@@ -20,3 +20,27 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test
         run: test/run-tests.sh
+
+  # The action itself, as a workflow uses it: inputs go in, outputs come out. The script's tests do not cover action.yml.
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start a stand-in for the Provelox API
+        run: |
+          node test/mock-api.mjs 8099 ok &
+          for _ in $(seq 1 50); do curl -s -o /dev/null http://127.0.0.1:8099/ && break; sleep 0.1; done
+      - id: deploy
+        uses: ./
+        with:
+          server-url: http://127.0.0.1:8099
+          deploy-key: pvxk_test_secret
+          image: acme/web:1
+      - name: The outputs reach the workflow
+        env:
+          APP: ${{ steps.deploy.outputs.app }}
+          VERSION: ${{ steps.deploy.outputs.version }}
+          IMAGE: ${{ steps.deploy.outputs.image }}
+        run: |
+          echo "app=${APP} version=${VERSION} image=${IMAGE}"
+          test "$APP" = demo && test "$VERSION" = 1 && test "$IMAGE" = acme/web:1
