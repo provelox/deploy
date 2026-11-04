@@ -3,7 +3,7 @@
 # step would do in a workflow: its exit code, the annotations it prints and the outputs it sets.
 #   test/run-tests.sh
 set -uo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 
 KEY=pvxk_test_secret
 failures=0
@@ -46,7 +46,7 @@ expect() {
     echo "ok   $name"
   else
     echo "FAIL $name:$bad"
-    echo "$OUT" | sed 's/^/       | /'
+    while IFS= read -r line; do echo "       | ${line}"; done <<<"$OUT"
     failures=$((failures + 1))
   fi
 }
@@ -94,8 +94,13 @@ run hang
 expect "a server that never answers does not hold the step for ever" 1 "::error::Could not reach"
 
 run ok PROVELOX_DEPLOY_KEY="$KEY"
-[[ "$OUT" == *"::add-mask::${KEY}"* ]] && echo "ok   the key is masked before anything else is printed" || { echo "FAIL the key is not masked"; failures=$((failures + 1)); }
 checks=$((checks + 1))
+if [[ "$OUT" == *"::add-mask::${KEY}"* ]]; then
+  echo "ok   the key is masked before anything else is printed"
+else
+  echo "FAIL the key is not masked"
+  failures=$((failures + 1))
+fi
 
 # An annotation is one line, with %, newlines and carriage returns encoded; the function is read out of the script so
 # this is tested on whatever bash runs it (macOS ships 3.2, which treats quotes inside ${var//a/'b'} differently)
