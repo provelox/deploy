@@ -8,7 +8,7 @@ branding:
 
 inputs:
   server-url:
-    description: 'Base URL of your Provelox server, for example https://provelox.example.com'
+    description: 'Base URL of your Provelox API, for example https://api.example.com. By default it is api.<your domain>: the address the console talks to, not the console itself.'
     required: true
   deploy-key:
     description: "The app's deploy key. Store it as a repository secret."

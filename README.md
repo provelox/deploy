@@ -22,7 +22,7 @@ jobs:
 
       - uses: provelox/deploy@v1
         with:
-          server-url: https://provelox.example.com
+          server-url: https://api.example.com
           deploy-key: ${{ secrets.PROVELOX_DEPLOY_KEY }}
           image: ghcr.io/acme/web:${{ github.sha }}
 ```
@@ -31,7 +31,8 @@ jobs:
 
 1. In the Provelox console, open the app and create a **deploy key**. It is shown once.
 2. Add it to your repository as a secret, for example `PROVELOX_DEPLOY_KEY`.
-3. Add the step above to your workflow.
+3. Note your API address: `https://api.<your domain>` unless you installed with `--api-host`.
+4. Add the step above to your workflow.
 
 A deploy key belongs to one app and can only roll that app to a new version of its own image. If the key leaks, it cannot run something else with the app's secrets and data. You can revoke it at any time.
 
@@ -39,7 +40,7 @@ A deploy key belongs to one app and can only roll that app to a new version of i
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
-| `server-url` | yes | | Base URL of your Provelox server. |
+| `server-url` | yes | | Base URL of your Provelox **API**, such as `https://api.example.com`. By default that is `api.<your domain>` (what you gave `--root-domain`), not the console's address. |
 | `deploy-key` | yes | | The app's deploy key. |
 | `image` | yes | | Image to deploy, such as `ghcr.io/acme/web:1.4.2`. |
 | `wait` | no | `true` | Wait for the deploy to settle and fail the step if it fails. |

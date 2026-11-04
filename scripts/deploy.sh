@@ -70,7 +70,7 @@ problem() {
 request POST /deploy "$(jq -nc --arg image "$IMAGE_WANTED" '{image: $image}')"
 case "$STATUS" in
 2*) ;;
-000) fail "Could not reach ${SERVER}. Is the address right, and can the runner reach the server?" ;;
+000) fail "Could not reach ${SERVER}. Is the address right (it is the API, api.<your domain> by default, not the console), and can the runner reach the server?" ;;
 401) fail "Provelox did not accept the deploy key (401). Check the secret, and that the key was not revoked: $(problem)" ;;
 *) fail "Provelox answered ${STATUS}: $(problem)" ;;
 esac
