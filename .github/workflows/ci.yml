@@ -1,0 +1,22 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ShellCheck
+        run: shellcheck scripts/deploy.sh test/run-tests.sh
+
+  # Runs the action's script against a stand-in for the Provelox API (test/mock-api.mjs), which answers with the API's
+  # real response shapes: healthy, rolled back, forgotten after a restart, replaced by a newer deploy, a proxy outage...
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: test/run-tests.sh

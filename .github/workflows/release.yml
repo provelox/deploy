@@ -1,0 +1,23 @@
+name: Release
+# Publishing a release (for example v1.2.3) moves the matching major tag (v1) to it,
+# so workflows that use provelox/deploy@v1 pick up the new version.
+on:
+  release:
+    types: [published, edited]
+
+permissions:
+  contents: write
+
+jobs:
+  move-major-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Move the major tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          [[ "$TAG" =~ ^v([0-9]+)\.[0-9]+\.[0-9]+$ ]] || { echo "Not a semver tag: $TAG"; exit 0; }
+          major="v${BASH_REMATCH[1]}"
+          git tag -f "$major" "$TAG"
+          git push -f origin "$major"

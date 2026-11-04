@@ -1,0 +1,50 @@
+name: 'Provelox Deploy'
+description: 'Roll a Provelox app onto a new image and wait for the deploy to settle.'
+author: 'Provelox'
+
+branding:
+  icon: 'upload-cloud'
+  color: 'blue'
+
+inputs:
+  server-url:
+    description: 'Base URL of your Provelox server, for example https://provelox.example.com'
+    required: true
+  deploy-key:
+    description: "The app's deploy key. Store it as a repository secret."
+    required: true
+  image:
+    description: 'Image to deploy, for example ghcr.io/acme/web:1.4.2. It must be a new tag of the app''s current image.'
+    required: true
+  wait:
+    description: 'Wait for the deploy to settle and fail the step if it fails.'
+    required: false
+    default: 'true'
+  timeout:
+    description: 'Seconds to wait for the deploy before failing the step.'
+    required: false
+    default: '600'
+
+outputs:
+  app:
+    description: 'Name of the app that was deployed.'
+    value: ${{ steps.deploy.outputs.app }}
+  version:
+    description: 'Deploy version Provelox assigned.'
+    value: ${{ steps.deploy.outputs.version }}
+  image:
+    description: 'Image the app is now rolling onto.'
+    value: ${{ steps.deploy.outputs.image }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: deploy
+      shell: bash
+      run: bash "$GITHUB_ACTION_PATH/scripts/deploy.sh"
+      env:
+        PROVELOX_SERVER_URL: ${{ inputs.server-url }}
+        PROVELOX_DEPLOY_KEY: ${{ inputs.deploy-key }}
+        PROVELOX_IMAGE: ${{ inputs.image }}
+        PROVELOX_WAIT: ${{ inputs.wait }}
+        PROVELOX_TIMEOUT: ${{ inputs.timeout }}
